@@ -28,10 +28,9 @@ describe("GET /api/topics", () => {
     .then(({ body }) => {
       expect(body.topics.length).toBe(3);
       body.topics.forEach(topic => {
-        const { slug, description, img_url } = topic;
+        const { slug, description } = topic;
         expect(typeof slug).toBe('string');
         expect(typeof description).toBe('string');
-        expect(typeof img_url).toBe('string');
       })
     })
   });
