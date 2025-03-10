@@ -1,7 +1,7 @@
 const db = require("../db/connection");
 
 exports.selectTopics = () => {
-    const queryStr = 'SELECT * FROM topics;'
+    const queryStr = 'SELECT slug, description FROM topics;'
     return db.query(queryStr)
     .then(({ rows }) => rows);
 };
