@@ -1,19 +1,17 @@
 const express = require("express");
 const app = express();
-const endpoints = require("./endpoints.json");
+const { getEndpoints } = require("./controllers/endpoints.controller");
 const { getTopics } = require("./controllers/topics.controller");
 const { getArticleById } = require("./controllers/articles.controller");
-const { customErrorHandler, psqlErrorHandler } = require("./controllers/errors.controller");
+const { customErrorHandler, psqlErrorHandler, invalidPathController } = require("./controllers/errors.controller");
 
-app.get("/api", (req, res) => res.status(200).send({endpoints}));
+app.get("/api", getEndpoints);
 
 app.get("/api/topics", getTopics);
 
 app.get("/api/articles/:article_id", getArticleById);
 
-app.all('*', (req, res, next) => {
-    res.status(404).send({ msg: 'Invalid URL' });
-})
+app.all('*', invalidPathController);
 
 app.use(psqlErrorHandler);
 
