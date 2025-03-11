@@ -5,7 +5,6 @@ const seed = require("../db/seeds/seed");
 const data = require("../db/data/test-data");
 const db = require("../db/connection");
 
-
 beforeEach(() => seed(data));
 afterAll(() => db.end());
 
@@ -20,10 +19,20 @@ describe("GET /api", () => {
   });
 });
 
+describe("ALL /notAPath", () => {
+  test("404: Responds with 'Invalid URL' when attempting to access a non-existent endpoint", () => {
+    return request(app).get("/notAPath")
+    .expect(404)
+    .then(({ body }) => {
+      expect(body.msg).toBe('Invalid URL');
+    });
+  });
+});
+
 describe("GET /api/topics", () => {
   test("200: Responds with all topics", () => {
     return request(app)
-    .get('/api/topics')
+    .get("/api/topics")
     .expect(200)
     .then(({ body: { topics } }) => {
       expect(topics.length).toBe(3);
@@ -34,32 +43,28 @@ describe("GET /api/topics", () => {
       })
     })
   });
-
-  test("404: Responds with 'Invalid URL' if given an invalid URL", () => {
-    return request(app).get("/api/topicss")
-    .expect(404)
-    .then(({ body }) => {
-      expect(body.msg).toBe('Invalid URL');
-    });
-  });
 });
 
 describe("GET /api/articles/:article_id", () => { 
   test("200: Responds with one article with given ID", () => {
-    
+    const expectedArticle = {
+      author: 'icellusedkars',
+      title: 'Eight pug gifs that remind me of mitch',
+      article_id: 3,
+      body: 'some gifs',
+      topic: 'mitch',
+      created_at: '2020-11-03T09:12:00.000Z',
+      votes: 0,
+      article_img_url: 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700'
+    }
+
     return request(app)
     .get('/api/articles/3')
     .expect(200)
     .then(( { body: { article } }) => {
-      const { author, title, article_id, body, topic, created_at, votes, article_img_url } = article;
+      const { article_id } = article;
       expect(article_id).toBe(3);
-      expect(typeof author).toBe("string");
-      expect(typeof title).toBe("string");
-      expect(typeof body).toBe("string");
-      expect(typeof topic).toBe("string");
-      expect(typeof created_at).toBe("string");
-      expect(typeof votes).toBe("number");
-      expect(typeof article_img_url).toBe("string");
+      expect(article).toMatchObject(expectedArticle);
     });
   });
   
@@ -79,5 +84,30 @@ describe("GET /api/articles/:article_id", () => {
     .then(({ body }) => {
       expect(body.msg).toBe("Bad request");
     });
+  });
+});
+
+describe("GET /api/articles", () => {
+  test("200: Responds with an articles array of article objects, sorted by date in descending order", () => {
+    const expectedArticle = {
+      author: expect.any(String),
+      title: expect.any(String),
+      article_id: expect.any(Number),
+      topic: expect.any(String),
+      created_at: expect.any(String),
+      votes: expect.any(Number),
+      article_img_url: expect.any(String),
+      comment_count: expect.any(Number)
+    }
+    return request(app)
+    .get("/api/articles")
+    .expect(200)
+    .then(({ body: { articles } }) => {
+      expect(articles.length).toBe(13);
+      expect(articles).toBeSortedBy('created_at', { descending: true });
+      articles.forEach(article => {
+        expect(article).toEqual(expect.objectContaining(expectedArticle));
+      });
+    })
   });
 });
