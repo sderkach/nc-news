@@ -5,6 +5,7 @@ const { getTopics } = require("./controllers/topics.controller");
 const { getArticleById, getArticles, patchArticleById } = require("./controllers/articles.controller");
 const { customErrorHandler, psqlErrorHandler, invalidPathController, serverErrorHandler } = require("./controllers/errors.controller");
 const { getCommentsByArticleId, postComment, deleteComment } = require("./controllers/comments.controller");
+const { getUsers } = require("./controllers/users.controller");
 
 app.use(express.json());
 
@@ -23,6 +24,8 @@ app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
 app.post("/api/articles/:article_id/comments", postComment);
 
 app.delete("/api/comments/:comment_id", deleteComment);
+
+app.get("/api/users", getUsers);
 
 app.all('*', invalidPathController);
 
