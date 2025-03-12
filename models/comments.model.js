@@ -47,7 +47,7 @@ exports.insertComment = (article_id, username, body) => {
 };
 
 exports.deleteCommentById = (comment_id) => {
-    queryStr = `
+    const queryStr = `
         DELETE FROM comments
         WHERE comment_id = $1
         RETURNING *
