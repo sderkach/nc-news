@@ -169,7 +169,7 @@ describe("POST /api/articles/:article_id/comments", () => {
       article_id: 2,
       author: "icellusedkars",
       body: "This is my first comment",
-      comment_id: expect.any(Number),
+      comment_id: 19,
       created_at: expect.any(String),
       votes: 0
     }
@@ -318,6 +318,33 @@ describe("PATCH /api/articles/:article_id", () => {
     })
     .expect(400)
     .then(({ body }) => {
+      expect(body.msg).toBe("Bad request");
+    });
+  });
+});
+
+describe("DELETE /api/comments/:comment_id", () => {
+  test("204: Deletes the comment by given id and responds with no content", () => {
+    return request(app)
+    .delete("/api/comments/10")
+    .expect(204)
+    .then(({ body }) => {
+      expect(body).toEqual({});
+    })
+  });
+  test("404: Responds with 'Comment not found' when given comment_id does not exist", () => {
+    return request(app)
+    .delete("/api/comments/999999")
+    .expect(404)
+    .then(({ body }) =>{
+      expect(body.msg).toBe("Comment not found");
+    });
+  });
+  test("400: Responds with 'Bad request' when given invalid comment_id", () => {
+    return request(app)
+    .delete("/api/comments/notAnId")
+    .expect(400)
+    .then(({ body }) =>{
       expect(body.msg).toBe("Bad request");
     });
   });
