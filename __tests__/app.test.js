@@ -169,7 +169,7 @@ describe("POST /api/articles/:article_id/comments", () => {
       article_id: 2,
       author: "icellusedkars",
       body: "This is my first comment",
-      comment_id: expect.any(Number),
+      comment_id: 19,
       created_at: expect.any(String),
       votes: 0
     }
