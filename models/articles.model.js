@@ -35,3 +35,21 @@ exports.selectArticles = () => {
     return db.query(queryStr)
     .then(({ rows }) => rows);
 };
+
+exports.updateArticle = (article_id, inc_votes) => {
+    if (!inc_votes) {
+        return Promise.reject({
+            status: 400,
+            msg: "Missing required fields" 
+        });
+    }
+    const queryStr = `
+        UPDATE articles
+        SET votes = votes + $1
+        WHERE article_id = $2
+        RETURNING *`;
+    
+    return db.query(queryStr, [inc_votes, article_id])
+    .then(({ rows }) => rows[0]);
+
+};
