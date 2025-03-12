@@ -162,3 +162,79 @@ describe("GET /api/articles/:article_id/comments", () => {
     });
   });
 });
+
+describe("POST /api/articles/:article_id/comments", () => {
+  test("201: Responds with the posted comment", () => {
+    const expectedComment = {
+      article_id: 2,
+      author: "icellusedkars",
+      body: "This is my first comment",
+      comment_id: expect.any(Number),
+      created_at: expect.any(String),
+      votes: 0
+    }
+    return request(app)
+    .post("/api/articles/2/comments")
+    .send({
+      username: "icellusedkars",
+      body: "This is my first comment"
+    })
+    .expect(201)
+    .then(({ body: { comment } }) => {
+      expect(comment).toMatchObject(expectedComment);
+    });
+  });
+
+  test("404: Responds with 'Article not found' when given article_id does not exist", () => {
+    return request(app)
+    .post("/api/articles/999999/comments")
+    .send({
+      username: "icellusedkars",
+      body: "This is my first comment"
+    })
+    .expect(404)
+    .then(({ body }) => {
+      expect(body.msg).toBe("Article not found");
+    });
+  });
+
+  test("400: Responds with 'Missing required fields' when request body is missing correct fields", () => {
+    return request(app)
+    .post("/api/articles/2/comments")
+    .send({
+      user: "icellusedkars",
+      body: "This is my first comment"
+    })
+    .expect(400)
+    .then(({ body }) => {
+      expect(body.msg).toBe("Missing required fields");
+    });
+  });
+
+  test("400: Responds with 'Invalid comment body' when body is not a string", () => {
+    return request(app)
+    .post("/api/articles/2/comments")
+    .send({
+      username: "icellusedkars",
+      body: 12345
+    })
+    .expect(400)
+    .then(({ body }) => {
+      expect(body.msg).toBe("Invalid comment body");
+    });
+  });
+
+  test("400: Responds with 'Foreign key violation' when a username doesn't exist", () => {
+    return request(app)
+    .post("/api/articles/2/comments")
+    .send({
+      username: "serhii",
+      body: "This is my first comment"
+    })
+    .expect(400)
+    .then(({ body }) => {
+      expect(body.msg).toBe("Foreign key violation");
+    });
+  });
+
+});

@@ -23,3 +23,25 @@ exports.selectCommentsByArticleId = (article_id) => {
     return Promise.all(promises)
     .then(([_, { rows }]) => rows);
 };
+
+exports.insertComment = (article_id, username, body) => {
+    if (!username || !body) {
+        return Promise.reject({
+            status: 400,
+            msg: "Missing required fields" 
+        });
+    }
+
+    if (typeof body !== "string") {
+        return Promise.reject({ status: 400, msg: "Invalid comment body" });
+    }
+
+    const queryStr = `
+    INSERT INTO comments (article_id, author, body)
+    VALUES ($1, $2, $3) 
+    RETURNING *;
+    `;
+    
+    return db.query(queryStr, [article_id, username, body])
+    .then(({ rows }) => rows[0]);
+};
