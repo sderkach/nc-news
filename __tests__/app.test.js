@@ -88,17 +88,17 @@ describe("GET /api/articles/:article_id", () => {
 });
 
 describe("GET /api/articles", () => {
+  const expectedArticle = {
+    author: expect.any(String),
+    title: expect.any(String),
+    article_id: expect.any(Number),
+    topic: expect.any(String),
+    created_at: expect.any(String),
+    votes: expect.any(Number),
+    article_img_url: expect.any(String),
+    comment_count: expect.any(Number)
+  }
   test("200: Responds with an articles array of article objects, sorted by date in descending order", () => {
-    const expectedArticle = {
-      author: expect.any(String),
-      title: expect.any(String),
-      article_id: expect.any(Number),
-      topic: expect.any(String),
-      created_at: expect.any(String),
-      votes: expect.any(Number),
-      article_img_url: expect.any(String),
-      comment_count: expect.any(Number)
-    }
     return request(app)
     .get("/api/articles")
     .expect(200)
@@ -109,6 +109,50 @@ describe("GET /api/articles", () => {
         expect(article).toEqual(expect.objectContaining(expectedArticle));
       });
     })
+  });
+
+  test("200: Responds with articles sorted by given column in descending order (default)", () => {
+    return request(app)
+    .get("/api/articles?sort_by=votes")
+    .expect(200)
+    .then(({ body: { articles } }) => {
+      expect(articles.length).toBe(13);
+      expect(articles).toBeSortedBy("votes", { descending: true });
+      articles.forEach(article => {
+        expect(article).toEqual(expect.objectContaining(expectedArticle));
+      });
+    });
+  });
+
+  test("200: Responds with articles sorted by given column in ascending order when order=asc is passed", () => {
+    return request(app)
+    .get("/api/articles?sort_by=votes&order=asc")
+    .expect(200)
+    .then(({ body: { articles } }) => {
+      expect(articles.length).toBe(13);
+      expect(articles).toBeSortedBy("votes", { descending: false });
+      articles.forEach(article => {
+        expect(article).toEqual(expect.objectContaining(expectedArticle));
+      });
+    });
+  });
+
+  test("400: Responds with 'Invalid sort_by column' when given invalid sort_by column", () => {
+    return request(app)
+    .get("/api/articles?sort_by=notAColumn")
+    .expect(400)
+    .then(({ body }) => {
+      expect(body.msg).toBe("Invalid sort_by column");
+    });
+  });
+
+  test("400: Responds with 'Invalid order query' when given invalid order value", () => {
+    return request(app)
+    .get("/api/articles?order=invalid")
+    .expect(400)
+    .then(({ body }) => {
+      expect(body.msg).toBe("Invalid order query");
+    });
   });
 });
 
