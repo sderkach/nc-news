@@ -137,6 +137,42 @@ describe("GET /api/articles", () => {
     });
   });
 
+  test("200: Responds with articles filtered by given topic", () => {
+    return request(app)
+    .get("/api/articles?topic=cats")
+    .expect(200)
+    .then(({ body: { articles } }) => {
+      expect(articles.length).toBe(1);
+      articles.forEach(article => {
+        expect(article.topic).toBe("cats");
+        expect(article).toEqual(expect.objectContaining(expectedArticle));
+      });
+    });
+  });
+
+  test("200: Responds with articles filtered by given topic, sorted by given column in ascending order", () => {
+    return request(app)
+    .get("/api/articles?topic=mitch&sort_by=comment_count&order=asc")
+    .expect(200)
+    .then(({ body: { articles } }) => {
+      expect(articles.length).toBe(12);
+      expect(articles).toBeSortedBy("comment_count", { descending: false });
+      articles.forEach(article => {
+        expect(article.topic).toBe("mitch");
+        expect(article).toEqual(expect.objectContaining(expectedArticle));
+      });
+    });
+  });
+
+  test("404: Responds with 'No articles found for the specified topic.' when there are no articles with the given topic", () => {
+    return request(app)
+    .get("/api/articles?topic=coding&sort_by=comment_count&order=asc")
+    .expect(404)
+    .then(({ body }) => {
+      expect(body.msg).toBe("No articles found for the specified topic");
+    });
+  });
+
   test("400: Responds with 'Invalid sort_by column' when given invalid sort_by column", () => {
     return request(app)
     .get("/api/articles?sort_by=notAColumn")
