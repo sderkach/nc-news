@@ -15,7 +15,7 @@ exports.selectArticleById = (article_id) => {
     });
 };
 
-exports.selectArticles = (sort_by = "created_at", order = "desc") => {
+exports.selectArticles = (sort_by = "created_at", order = "desc", topic) => {
     const validColumns = ["article_id", "title", "topic", "author", "created_at", "votes", "article_img_url", "comment_count"];
     const validOrders = ["asc", "desc"];
 
@@ -33,7 +33,8 @@ exports.selectArticles = (sort_by = "created_at", order = "desc") => {
         });
     }
 
-    const queryStr = `
+    const queryValues = [];
+    let queryStr = `
         SELECT 
             articles.author,
             articles.title,
@@ -45,12 +46,25 @@ exports.selectArticles = (sort_by = "created_at", order = "desc") => {
             COUNT(comments.comment_id)::int AS comment_count 
         FROM articles
         LEFT JOIN comments ON articles.article_id = comments.article_id
-        GROUP BY articles.article_id
-        ORDER BY ${sort_by} ${order.toUpperCase()};
     `;
-    
-    return db.query(queryStr)
-    .then(({ rows }) => rows);
+
+    if (topic) {
+        queryStr += ` WHERE topic = $1`
+        queryValues.push(topic);
+    }
+
+    queryStr += ` GROUP BY articles.article_id ORDER BY ${sort_by} ${order.toUpperCase()};`;
+
+    return db.query(queryStr, queryValues)
+    .then(({ rows }) => {
+        if (topic && rows.length === 0) {
+            return Promise.reject({
+                status: 404,
+                msg: "No articles found for the specified topic"
+            });
+        }
+        return rows;
+    });
 };
 
 exports.updateArticle = (article_id, inc_votes) => {
