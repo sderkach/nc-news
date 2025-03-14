@@ -1,4 +1,5 @@
 const db = require("../db/connection");
+const { checkTopicExists } = require("./topics.model");
 
 exports.selectArticleById = (article_id) => {
     const queryStr = `
@@ -33,6 +34,7 @@ exports.selectArticleById = (article_id) => {
 exports.selectArticles = (sort_by = "created_at", order = "desc", topic) => {
     const validColumns = ["article_id", "title", "topic", "author", "created_at", "votes", "article_img_url", "comment_count"];
     const validOrders = ["asc", "desc"];
+    let checkTopic;
 
     if (!validColumns.includes(sort_by)) {
         return Promise.reject({ 
@@ -64,22 +66,15 @@ exports.selectArticles = (sort_by = "created_at", order = "desc", topic) => {
     `;
 
     if (topic) {
+        checkTopic = checkTopicExists(topic);
         queryStr += ` WHERE topic = $1`
         queryValues.push(topic);
     }
 
     queryStr += ` GROUP BY articles.article_id ORDER BY ${sort_by} ${order.toUpperCase()};`;
-
-    return db.query(queryStr, queryValues)
-    .then(({ rows }) => {
-        if (topic && rows.length === 0) {
-            return Promise.reject({
-                status: 404,
-                msg: "No articles found for the specified topic"
-            });
-        }
-        return rows;
-    });
+    const promises = [checkTopic, db.query(queryStr, queryValues)];
+    return Promise.all(promises)
+    .then(([_, { rows }]) => rows);
 };
 
 exports.updateArticle = (article_id, inc_votes) => {
