@@ -165,12 +165,21 @@ describe("GET /api/articles", () => {
     });
   });
 
-  test("404: Responds with 'No articles found for the specified topic.' when there are no articles with the given topic", () => {
+  test("200: Responds with an empty array when there are no articles for the existing topic", () => {
+    return request(app)
+    .get("/api/articles?topic=paper&sort_by=comment_count&order=asc")
+    .expect(200)
+    .then(({ body: { articles } }) => {
+      expect(articles).toEqual([]);
+    });
+  });
+
+  test("404: Responds with 'Topic not found' when given topic does not exist", () => {
     return request(app)
     .get("/api/articles?topic=coding&sort_by=comment_count&order=asc")
     .expect(404)
     .then(({ body }) => {
-      expect(body.msg).toBe("No articles found for the specified topic");
+      expect(body.msg).toBe("Topic not found");
     });
   });
 
