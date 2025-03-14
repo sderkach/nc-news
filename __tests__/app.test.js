@@ -56,7 +56,6 @@ describe("GET /api/articles/:article_id", () => {
       created_at: '2020-11-03T09:12:00.000Z',
       votes: 0,
       article_img_url: 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700',
-      comment_count: 2
     }
 
     return request(app)
@@ -66,6 +65,17 @@ describe("GET /api/articles/:article_id", () => {
       const { article_id } = article;
       expect(article_id).toBe(3);
       expect(article).toMatchObject(expectedArticle);
+    });
+  });
+
+  test("200: Comment_count field is added to the article object, showing number of comments for the given article_id", () => {
+    return request(app)
+    .get('/api/articles/3')
+    .expect(200)
+    .then(( { body: { article } }) => {
+      const { article_id, comment_count } = article;
+      expect(article_id).toBe(3);
+      expect(comment_count).toBe(2);
     });
   });
   
