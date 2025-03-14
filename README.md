@@ -4,7 +4,7 @@
 NC News is a RESTful API that serves news articles, comments, topics, and user information. It allows users to interact with the data, including fetching articles, adding comments, voting on articles, and more. This API is designed to be used as the backend for a front-end news application.
 
 ## Hosted Version
-A hosted version of the API is available here: **[NC News](https://nc-news-yimi.onrender.com)**
+A hosted version of the API is available here: **[NC News](https://nc-news-yimi.onrender.com/api)**
 
 ## Getting Started
 To run this project locally, follow the steps below.
