@@ -6,6 +6,9 @@ const { getArticleById, getArticles, patchArticleById } = require("./controllers
 const { customErrorHandler, psqlErrorHandler, invalidPathController, serverErrorHandler } = require("./controllers/errors.controller");
 const { getCommentsByArticleId, postComment, deleteComment } = require("./controllers/comments.controller");
 const { getUsers } = require("./controllers/users.controller");
+const cors = require("cors");
+
+app.use(cors());
 
 app.use(express.json());
 
